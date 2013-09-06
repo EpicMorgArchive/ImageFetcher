@@ -5,8 +5,9 @@ from django.conf import settings
 from django.core.validators import URLValidator
 from django.http import HttpResponse
 from django.views.generic import TemplateView
-from ifwm.home.helpClasses import Error
+from ifwm.home.helpClasses import Error, ProgressInfo
 from ifwm.home.models import Pages, Images, Urls
+import django.utils.simplejson
 
 Validator = URLValidator()
 
@@ -17,7 +18,6 @@ Validator = URLValidator()
 	#3	error							:error
 	#4	banned							:denied
 	#5	converting
-
 def getTime():
 	return int(time.time())
 def showErrorPage(request, errorname, errortext):
@@ -53,6 +53,7 @@ class HomeView(TemplateView):
 		return self.render_to_response(context)
 
 class AddUrlView(TemplateView):
+	
 	def _insertUrl(self, url, hasher):
 		urlinfo = Urls()
 		urlinfo.urlhash=hasher
@@ -117,11 +118,25 @@ class ImagesPageView(TemplateView):
 		return self._showPage(url, page, None, None)
 	
 	def get(self, request, *args, **kwargs):
-		sid = kwargs.get('id')
 		pageid = 0
+		sid = kwargs.get('id')
 		try:
 			pageid = int(sid)
-			page = Pages.objects.get(url=url)
+			page = Pages.objects.get(pk=pageid)
 		except:
 			return showErrorPage(request, "404", "Nothing found")
-		return self._showPage(url=page.url, page=page, args=args, kwargs=kwargs)
+		return self._showPage(page.url, page, args, kwargs)
+class PageProgress(TemplateView):
+	
+	def post(self, request, *args, **kwargs):
+		try:
+			ctimestamp = int(request.POST.get('timestamp',''))
+			pageid = int(request.POST.get('page',''))
+			page = Pages.objects.get(pk=pageid)
+			images = page.images_set.filter(url.timestamp>=ctimestamp).all()
+			images.prefetch_related('url')
+			progress = ProgressInfo(page, getTime(), page.status, images)
+			jsondata = simplejson.dumps(progress)
+			return HttpReponse(jsondata,mimetype='application/json')
+		except:
+			return showErrorPage(request, "Bad request", "")
