@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}Image fetcher:Error{% endblock %}
+
+{% block container %}
+    <!-- Main hero unit for a primary marketing message or call to action -->
+    <div class="hero-unit" style="text-align: center;">
+       <h1>{{error.caption}}</h1>
+       <p>{{error.full_text}}</p>
+    </div>
+    <hr>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% autoescape on %}
+{% block title %} Saved images from {{ url.url }} {% endblock %}
+
+{% block container %}
+    <!-- Main hero unit for a primary marketing message or call to action -->
+    <div class="container" style="text-align: center;">
+        <h1>Image page goes here</h1>
+        {# {{ args }} #}
+        <br/>
+        {# {{ kwargs }} #}
+        <br/>
+        {{ page }}
+        <br/>
+        Images:
+        <br/>
+        {% for image in images %}
+    		{% if image.url.status == 2 %}<a href="{{IMAGE_SAVE_PATH}}{{image.id}}.{{image.ext}}">{% endif %}
+			<img alt="example4" class="img_preview" src="{%if image.url.status == 2%}{{IMAGE_SAVE_PATH}}{{image.id}}.{{ image.ext }}{ %else %}{{ image.url }}{% endif %}">
+		{% if image.url.status == 2 %}</a>{% endif %}
+        {% endfor %}
+        <br/>
+        Timestamp:
+        <br/>
+        {{ timestamp }}
+    </div>
+    <hr>
+{% endblock %}
+{% endautoescape %}
