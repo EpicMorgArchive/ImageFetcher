@@ -4,6 +4,7 @@ import time
 from django.conf import settings
 from django.core.validators import URLValidator
 from django.http import HttpResponse
+from django.shortcuts import render
 from django.views.generic import TemplateView
 from ifwm.home.helpClasses import Error, ProgressInfo
 from ifwm.home.models import Pages, Images, Urls
@@ -20,11 +21,11 @@ Validator = URLValidator()
 	#5	converting
 def getTime():
 	return int(time.time())
-def showErrorPage(request, errorname, errortext):
+def showErrorPage(request, errorname, errortext, status=200):
 	errorpage = ErrorPageView()
 	errorpage.request=request
 	error = Error(errorname, errortext)
-	return errorpage.showError(error)
+	return errorpage.showError(error, status)
 def showImagesPage(request, url):
 	ipage = ImagesPageView()
 	ipage.request=request
@@ -37,11 +38,11 @@ def getMD5Str(inputStr):
 
 class ErrorPageView(TemplateView):
 	template_name = 'error.html'
-	def showError(self, error):
+	def showError(self, error,status=200):
 		context = {
 			'error':error
 		}
-		return self.render_to_response(context)
+		return render(self.request, self.template_name, context, status=status)
 
 class HomeView(TemplateView):
 	template_name = 'home.html'
@@ -67,7 +68,7 @@ class AddUrlView(TemplateView):
 	def post(self, request, *args, **kwargs):
 		url = request.POST.get('url','')
 		if not url:
-			return showErrorPage(request,"Bad url", "Empty url")
+			return showErrorPage(request,"Bad url", "Empty url", 400)
 		try:
 			Validator(url)
 		except:
@@ -75,16 +76,16 @@ class AddUrlView(TemplateView):
 		try:
 			Validator(url)
 		except:
-			return showErrorPage(request,"Bad url", "Invalid url")
+			return showErrorPage(request,"Bad url", "Invalid url", 400)
 		hasher = getMD5Str(url)
 		dburls = Urls.objects.filter(urlhash=hasher)[:1]
 		if dburls:
 			urlinfo = dburls[0]
 			#link to image
 			if not Pages.objects.filter(url=urlinfo.id)[:1]:
-				return showErrorPage(request,"Bad url", "You are trying to add image")
+				return showErrorPage(request,"Bad url", "You are trying to add image", 400)
 			if urlinfo.status==4:
-				return showErrorPage(request,"Bad url", "This url was banned")
+				return showErrorPage(request,"Bad url", "This url was banned", 403)
 			if urlinfo.status==2 | urlinfo.status==3:
 				urlinfo.status = 0
 				urlinfo.save()
@@ -92,7 +93,7 @@ class AddUrlView(TemplateView):
 			try:
 				urlinfo = self._insertUrl(url, hasher)
 			except:
-				return showErrorPage(request,"Bad url", "Invalid url")
+				return showErrorPage(request,"Bad url", "Invalid url", 400)
 		return  showImagesPage(request, urlinfo)
 
 class ImagesPageView(TemplateView):
@@ -124,14 +125,14 @@ class ImagesPageView(TemplateView):
 			pageid = int(sid)
 			page = Pages.objects.get(pk=pageid)
 		except:
-			return showErrorPage(request, "404", "Nothing found")
+			return showErrorPage(request, "404", "Nothing found", 404)
 		return self._showPage(page.url, page, args, kwargs)
-class PageProgress(TemplateView):
+class PageProgress(HttpResponse): 
 	
 	def post(self, request, *args, **kwargs):
 		try:
 			ctimestamp = int(request.POST.get('timestamp',''))
-			pageid = int(request.POST.get('page',''))
+			pageid = int(request.POST.get('pageid',''))
 			page = Pages.objects.get(pk=pageid)
 			images = page.images_set.filter(url.timestamp>=ctimestamp).all()
 			images.prefetch_related('url')
@@ -139,4 +140,4 @@ class PageProgress(TemplateView):
 			jsondata = simplejson.dumps(progress)
 			return HttpReponse(jsondata,mimetype='application/json')
 		except:
-			return showErrorPage(request, "Bad request", "")
+			return showErrorPage(request, "Bad request", "", 400)

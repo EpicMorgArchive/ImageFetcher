@@ -11,7 +11,7 @@ urlpatterns = patterns('',
     url(r'^$', HomeView.as_view()),
     url(r'^page(?P<id>[0-9]*)$', ImagesPageView.as_view()),
     url(r'^add$', AddUrlView.as_view()),
-    url(r'^progress$', PageProgress.as_view()),
+    url(r'^progress$', PageProgress),
     # static
     url(r'^%s(?P<path>.*)$' % settings.STATIC_URL.lstrip('/'), serve,
         {'show_indexes': True, 'insecure': False}),
