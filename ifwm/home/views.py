@@ -2,13 +2,16 @@
 # -*- coding: utf-8 -*-
 import time
 from django.conf import settings
+from django.conf.urls import url
+from django.core import serializers
 from django.core.validators import URLValidator
 from django.http import HttpResponse
 from django.shortcuts import render
-from django.views.generic import TemplateView
-from ifwm.home.helpClasses import Error, ProgressInfo
+from django.utils import simplejson
+from django.views.generic import TemplateView, View
+from django.views.decorators.csrf import csrf_exempt
+from ifwm.home.helpClasses import *
 from ifwm.home.models import Pages, Images, Urls
-import django.utils.simplejson
 
 Validator = URLValidator()
 
@@ -127,17 +130,21 @@ class ImagesPageView(TemplateView):
 		except:
 			return showErrorPage(request, "404", "Nothing found", 404)
 		return self._showPage(page.url, page, args, kwargs)
-class PageProgress(HttpResponse): 
-	
-	def post(self, request, *args, **kwargs):
+
+class PageProgress(View): 
+@csrf_exempt
+	def get(self, request, *args, **kwargs):
 		try:
-			ctimestamp = int(request.POST.get('timestamp',''))
-			pageid = int(request.POST.get('pageid',''))
+			sctimestamp = request.POST.get('timestamp')
+			spageid = request.POST.get('pageid')
+			ctimestamp = int(sctimestamp)
+			pageid = int(spageid)
 			page = Pages.objects.get(pk=pageid)
-			images = page.images_set.filter(url.timestamp>=ctimestamp).all()
+			images1 = page.images_set.exclude(url__status__lt=2).filter(url__date__gte=ctimestamp)
+			images = images1
 			images.prefetch_related('url')
-			progress = ProgressInfo(page, getTime(), page.status, images)
-			jsondata = simplejson.dumps(progress)
-			return HttpReponse(jsondata,mimetype='application/json')
+			pi = ProgressInfo(page, getTime(), page.url.status, images)
+			jsondata = pi.getJson()
+			return HttpResponse(jsondata, mimetype='application/json')
 		except:
 			return showErrorPage(request, "Bad request", "", 400)

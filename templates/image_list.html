@@ -1,6 +1,16 @@
 {% extends "base.html" %}
+
+{% block additional_imports %}
+<script src="{{ STATIC_URL }}js/page_progress.js"></script>
+<script>
+	var timestamp = {{ timestamp }};
+	var pageid = {{ page.url.id }};
+</script>
+{% endblock %}
+
 {% autoescape on %}
 {% block title %} Saved images from {{ url.url }} {% endblock %}
+{% endautoescape %}
 
 {% block container %}
     <div class="container" style="text-align: center;">
@@ -25,4 +35,3 @@
     </div>
     <hr>
 {% endblock %}
-{% endautoescape %}
