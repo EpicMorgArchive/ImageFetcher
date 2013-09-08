@@ -12,6 +12,7 @@ from django.views.generic import TemplateView, View
 from django.views.decorators.csrf import csrf_exempt
 from ifwm.home.helpClasses import *
 from ifwm.home.models import Pages, Images, Urls
+from django.core.context_processors import request
 
 Validator = URLValidator()
 
@@ -132,19 +133,23 @@ class ImagesPageView(TemplateView):
 		return self._showPage(page.url, page, args, kwargs)
 
 class PageProgress(View): 
-@csrf_exempt
-	def get(self, request, *args, **kwargs):
+	def resp(self, params):
 		try:
-			sctimestamp = request.POST.get('timestamp')
-			spageid = request.POST.get('pageid')
+			sctimestamp = params.get('timestamp')
+			spageid = params.get('pageid')
 			ctimestamp = int(sctimestamp)
 			pageid = int(spageid)
 			page = Pages.objects.get(pk=pageid)
 			images1 = page.images_set.exclude(url__status__lt=2).filter(url__date__gte=ctimestamp)
-			images = images1
-			images.prefetch_related('url')
-			pi = ProgressInfo(page, getTime(), page.url.status, images)
+			images1.prefetch_related('url')
+			pi = ProgressInfo(page, getTime(), page.url.status, images1)
 			jsondata = pi.getJson()
 			return HttpResponse(jsondata, mimetype='application/json')
-		except:
-			return showErrorPage(request, "Bad request", "", 400)
+		except:	
+			return HttpResponse('{"status": "error" } ', mimetype='application/json', status=400)
+	#@csrf_exempt
+	#def post(self, request, *args, **kwargs):
+	#	return  self.resp(request.POST)	
+	def get(self, request, *args, **kwargs):
+		return  self.resp(request.GET)
+		

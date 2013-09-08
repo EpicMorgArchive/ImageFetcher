@@ -23,7 +23,6 @@
     </style>
     <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap-responsive.min.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/main.css">
-	{% block additional_imports %}{% endblock %}
     <script src="{{ STATIC_URL }}js/lib/modernizr-2.6.2-respond-1.1.0.min.js"></script>
 	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
 	<script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/lib/jquery-1.9.1.min.js"><\/script>')</script>
@@ -32,6 +31,7 @@
 	<script src="{{ STATIC_URL }}js/lib/bootstrap.min.js"></script>
 	<script src="{{ STATIC_URL }}js/plugins.js"></script>
 	<script src="{{ STATIC_URL }}js/main.js"></script>
+	{% block additional_imports %}{% endblock %}
 </head>
 <body>
 <!--[if lt IE 7]>
