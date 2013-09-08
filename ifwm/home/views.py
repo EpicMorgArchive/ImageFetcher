@@ -136,26 +136,26 @@ class PageProgress(View):
 	def _badReq(self):
 		return HttpResponse('{"result": "error" } ', mimetype='application/json', status=400) 
 	def resp(self, params):
-		#try:
-		#parse
-		sctimestamp = params.get('timestamp')
-		spageid = params.get('pageid')
-		ctimestamp = int(sctimestamp)
-		pageid = int(spageid)
-		#date check
-		timestamp = getTime()
-		if ctimestamp > timestamp:
+		try:
+			#parse
+			sctimestamp = params.get('timestamp')
+			spageid = params.get('pageid')
+			ctimestamp = int(sctimestamp)
+			pageid = int(spageid)
+			#date check
+			timestamp = getTime()
+			if ctimestamp > timestamp:
+				return self._badReq()
+			#db fetch
+			page = Pages.objects.get(pk=pageid)
+			images = page.images_set.exclude(url__status__lt=2).filter(url__date__gte=ctimestamp)
+			images.prefetch_related('url')
+			#jsonize
+			pi = ProgressInfo(page, timestamp, images)
+			jsondata = pi.getJson()
+			return HttpResponse(jsondata, mimetype='application/json')
+		except:
 			return self._badReq()
-		#db fetch
-		page = Pages.objects.get(pk=pageid)
-		images = page.images_set.exclude(url__status__lt=2).filter(url__date__gte=ctimestamp)
-		images.prefetch_related('url')
-		#jsonize
-		pi = ProgressInfo(page, timestamp, images)
-		jsondata = pi.getJson()
-		return HttpResponse(jsondata, mimetype='application/json')
-		#except:
-		#	return self._badReq()
 	def post(self, request, *args, **kwargs):
 		return  self.resp(request.POST)	
 	def get(self, request, *args, **kwargs):
