@@ -132,24 +132,32 @@ class ImagesPageView(TemplateView):
 			return showErrorPage(request, "404", "Nothing found", 404)
 		return self._showPage(page.url, page, args, kwargs)
 
-class PageProgress(View): 
+class PageProgress(View):
+	def _badReq(self):
+		return HttpResponse('{"result": "error" } ', mimetype='application/json', status=400) 
 	def resp(self, params):
-		try:
-			sctimestamp = params.get('timestamp')
-			spageid = params.get('pageid')
-			ctimestamp = int(sctimestamp)
-			pageid = int(spageid)
-			page = Pages.objects.get(pk=pageid)
-			images1 = page.images_set.exclude(url__status__lt=2).filter(url__date__gte=ctimestamp)
-			images1.prefetch_related('url')
-			pi = ProgressInfo(page, getTime(), page.url.status, images1)
-			jsondata = pi.getJson()
-			return HttpResponse(jsondata, mimetype='application/json')
-		except:	
-			return HttpResponse('{"status": "error" } ', mimetype='application/json', status=400)
-	#@csrf_exempt
-	#def post(self, request, *args, **kwargs):
-	#	return  self.resp(request.POST)	
+		#try:
+		#parse
+		sctimestamp = params.get('timestamp')
+		spageid = params.get('pageid')
+		ctimestamp = int(sctimestamp)
+		pageid = int(spageid)
+		#date check
+		timestamp = getTime()
+		if ctimestamp > timestamp:
+			return self._badReq()
+		#db fetch
+		page = Pages.objects.get(pk=pageid)
+		images = page.images_set.exclude(url__status__lt=2).filter(url__date__gte=ctimestamp)
+		images.prefetch_related('url')
+		#jsonize
+		pi = ProgressInfo(page, timestamp, images)
+		jsondata = pi.getJson()
+		return HttpResponse(jsondata, mimetype='application/json')
+		#except:
+		#	return self._badReq()
+	def post(self, request, *args, **kwargs):
+		return  self.resp(request.POST)	
 	def get(self, request, *args, **kwargs):
 		return  self.resp(request.GET)
 		

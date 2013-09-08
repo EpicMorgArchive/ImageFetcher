@@ -3,8 +3,12 @@
 {% block additional_imports %}
 <script src="{{ STATIC_URL }}js/page_progress.js"></script>
 <script>
+	var status = {{ page.url.status }};
 	var timestamp = {{ timestamp }};
 	var pageid = {{ page.url.id }};
+	var fetch_running = false;
+	var check_interval = 5000;
+	$(window).load( startProgress() );
 </script>
 {% endblock %}
 
