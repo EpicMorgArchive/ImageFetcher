@@ -33,6 +33,6 @@ class Images(models.Model):
     url = models.OneToOneField(Urls,primary_key=True)
     ext = models.CharField(max_length=8L)
     has_s = models.IntegerField(default=0)
-    page = models.ForeignKey(Pages)
+    page = models.ManyToManyField(Pages)
     class Meta:
         db_table = 'images'

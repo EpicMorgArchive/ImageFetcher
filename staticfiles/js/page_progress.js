@@ -11,22 +11,32 @@ function fetchData(){
     });
 }
 function startProgress() {
-	window.setTimeout(progress(), window.check_interval);
+	setTimeout(progress, window.check_interval);
 }
+function dbgOut(message) {
+	console.log(message);
+}
+//update loop
 function progress() {
-	alert ('Progress started');
+	dbgOut ('Progress started');
 	if (!fetch_running){
-		alert ('Condition success');
+		dbgOut ('Condition success');
 		fetch_running = true;
 		if(window.status < 2){
 			fetchData();
-			if (window.data["result"]==="ok")
-				alert('Data ok');
-			else
-				alert('Data error');
+			try
+			{
+				if (window.data["result"]==="ok")
+					dbgOut('Data ok');
+				else
+					dbgOut('Data error');
+			}
+			catch(e) {
+				dbgOut('JSON error');
+			}
 		}
 		fetch_running = false;
-		alert ('Progress exited');
-		window.setTimeout(progress(), window.check_interval);
+		dbgOut ('Progress exited');
+		setTimeout(progress, window.check_interval);
 	}
 }
