@@ -13,29 +13,24 @@
 {% endblock %}
 
 {% autoescape on %}
-{% block title %} Saved images from {{ url.url }} {% endblock %}
+{% block title %} Image fetcher | {{ page.url.url }} {% endblock %}
 {% endautoescape %}
 
 {% block container %}
-    <div class="container" style="text-align: center;">
-        <h1>Image page goes here</h1>
-        {# {{ args }} #}
-        <br/>
-        {# {{ kwargs }} #}
-        <br/>
-        {{ page }}
+    <div class="container">
+        <h1 style="text-align: center;">Saved images from  {{ page.url.url }}</h1>
         <br/>
         Images:
         <br />
         {% for image in images %}
-    		{% if image.url.status == 2 %}<a href="{{IMAGE_SAVE_PATH}}{{image.id}}.{{image.ext}}">{% endif %}
-			<img alt="example4" class="img_preview" src="{%if image.url.status == 2%}{{IMAGE_SAVE_PATH}}{{image.id}}.{{ image.ext }}{ %else %}{{ image.url }}{% endif %}">
-		{% if image.url.status == 2 %}</a>{% endif %}
+    		{% if image.url.status == 2 %}
+    		<a href="{{MEDIA_URL}}{{image.id}}.{{image.ext}}">
+				<img
+					class="img_preview"
+					src="{%if image.url.status == 2%}{{MEDIA_URL}}{{image.id}}.{{ image.ext }}{% else %}{{ image.url }}{% endif %}"
+				/>
+			</a>{% endif %}
         {% endfor %}
-        <br/>
-        Timestamp:
-        <br/>
-        {{ timestamp }}
     </div>
     <hr>
 {% endblock %}

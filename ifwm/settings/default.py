@@ -3,30 +3,36 @@ import os
 import sys
 from settings.mconf import *
 
+#media_root relative part
+IMAGE_SAVE_REAL_PATH= 'staticfiles/media/'
+#media_url relative part to STATIC_URL
+IMAGE_SAVE_WEB_PATH= 'media'
+#max page size to parse
+MAX_FETCH_PAGE_SIZE=512*1024
+#max image size to fetch
+MAX_FETCH_IMAGE_SIZE=4*1024*1024
+
+
 DEBUG=getDEBUG()
 TEMPLATE_DEBUG = DEBUG
 DATABASES = getDATABASES()
-
 ALLOWED_HOSTS = [
     '*' #debug
 ]
-
 ABSOLUTE_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 ABSOLUTE_TEMPLATES_PATH = os.path.abspath(os.path.join(ABSOLUTE_PROJECT_ROOT, 'templates/'))
 
 if not ABSOLUTE_PROJECT_ROOT in sys.path:
     sys.path.insert(0, ABSOLUTE_PROJECT_ROOT)
-
-# Absolute path to the directory static files should be collected to.
+    
 STATIC_ROOT = os.path.abspath(os.path.join(ABSOLUTE_PROJECT_ROOT, 'static/'))
 # Absolute filesystem path to the directory that will hold user-uploaded files.
-MEDIA_ROOT = os.path.abspath(os.path.join(ABSOLUTE_PROJECT_ROOT, 'staticfiles/media/'))
+MEDIA_ROOT = os.path.abspath(os.path.join(ABSOLUTE_PROJECT_ROOT, IMAGE_SAVE_REAL_PATH))
 
 # URL that handles the media, static, etc.
 STATIC_URL = '/static/'
-MEDIA_URL = STATIC_URL + 'media/'
+MEDIA_URL = STATIC_URL + IMAGE_SAVE_WEB_PATH
 
-# Additional locations of static files
 STATICFILES_DIRS = (
     os.path.abspath(os.path.join(ABSOLUTE_PROJECT_ROOT, 'staticfiles/')),
 )
@@ -34,40 +40,18 @@ ADMINS = (
     ('kasthack', 'kasthack@epicm.org'),
 )
 MANAGERS = ADMINS
-
-# Local time zone for this installation. Choices can be found here:
-# http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
-# although not all choices may be available on all operating systems.
-# On Unix systems, a value of None will cause Django to use the same
-# timezone as the operating system.
-# If running in a Windows environment this must be set to the same as your
-# system time zone.
+#localization settings
 TIME_ZONE = None
-
-# Language code for this installation. All choices can be found here:
-# http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-us'
-
 SITE_ID = 1
-
-# If you set this to False, Django will make some optimizations so as not
-# to load the internationalization machinery.
 USE_I18N = True
-
-# If you set this to False, Django will not format dates, numbers and
-# calendars according to the current locale.
 USE_L10N = True
-
-# If you set this to False, Django will not use timezone-aware datetimes.
 USE_TZ = True
-
+#installed app cofnig
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-
-# Make this unique, and don't share it with anybody.
-# http://www.miniwebtool.com/django-secret-key-generator/
 SECRET_KEY = '(gs5&emc462$ai7$@@a1oxnt5_e0^qs=*cnrbxn&q#4zdu!(2h'
 TEMPLATE_LOADERS = (
     'django.template.loaders.filesystem.Loader',

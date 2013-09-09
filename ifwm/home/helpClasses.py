@@ -1,6 +1,14 @@
 import json
 from django.core.paginator import Page
+import time
+from hashlib import md5
+def getMD5Str(inputStr):
+	hasher = md5()
+	hasher.update(inputStr)
+	return hasher.hexdigest()
 
+def getTime():
+	return int(time.time())
 #image[] -> {}[]
 def imgArrToDD(images):
 	cnt = len(images)
@@ -31,18 +39,19 @@ class Error(object):
 		self.caption = caption
 		self.full_text = full_text
 class ProgressInfo(object):
-	page = None
-	timestamp = 0
-	images = None
+	_page = None
+	_timestamp = 0
+	_images = None
 	def __init__(self, page, timestamp, images):
-		self.page = page
+		self.page = pageToDict(page)
 		self.timestamp = timestamp
-		self.images = list(images)
+		#images: queryset
+		self.images = imgArrToDD(list(images))
 	def getJson(self):
 		progress = {
 			'result' : 'ok',
-			'page': pageToDict(self.page), 
-			'timestamp': self.timestamp,
-			'images': imgArrToDD(self.images)
+			'page': self._page, 
+			'timestamp': self._timestamp,
+			'images': self._images
 		}
 		return json.dumps(progress)
