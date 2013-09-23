@@ -3,13 +3,21 @@
 {% block additional_imports %}
 <script src="{{ STATIC_URL }}js/page_progress.js"></script>
 <script>
-	var status = {{ page.url.status }};
-	var timestamp = {{ timestamp }};
-	var pageid = {{ page.url.id }};
-	var fetch_running = false;
-	var check_interval = 5000;
-	var progress_enabled = true;
+	var Status = {{ page.url.status }};
+	var Timestamp = {{ timestamp }};
+	var PageID = {{ page.url.id }};
+	var FetchRunning = false;	//lock
+	var CheckInterval = 5000; //data fetch interval
+	var e_pf = true;//data fetching
+	var e_pr = true;//render progressbar
+	var e_vb = true;//debug output
+	
+	var s_pcss = 'progress-striped';
+	var s_pbis = 'progress-bar-info';
+	var s_pbss = 'progress-bar-success';
+	var s_pbds = 'progress-bar-danger';
 	$(window).load( startProgress );
+	window.setInterval(progressBarUpdate, CheckInterval);
 </script>
 {% endblock %}
 
@@ -23,9 +31,11 @@
         <br/>
         Images:
 		<div>
-			<div class="progress">
-			  <div class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 60%;">
-				<span class="sr-only">60% Complete</span>
+			<div id="mpc" class="progress active">
+			  <div id="mpb" class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+				<span class="sr-only">
+					<span id="mpll" class="prgspan">0</span> of <span id="mplt" class="prgspan">0</span>
+				</span>
 			  </div>
 			</div>
 		</div>
