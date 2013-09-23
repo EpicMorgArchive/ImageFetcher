@@ -4,12 +4,12 @@
 
 {% block container %}
     <!-- Main hero unit for a primary marketing message or call to action -->
-    <div class="hero-unit" style="text-align: center;">
+    <div class="jumbotron" style="text-align: center;">
         <h1 style="line-height: 200%;">Image downloader</h1>
         <form id="add_form" action="/add" method="POST">
-	        <input type="text" class="span8" name="url">
+	        <input type="text" class="form-control" name="url">
 	        {% csrf_token %}
-        	<p><button class="btn btn-primary btn-large">Fetch images</button></p>
+        	<p><button class="btn btn-primary btn-lg">Fetch images</button></p>
     	</form>
     </div>
     <hr>
