@@ -43,11 +43,11 @@ class ProgressInfo(object):
 	_timestamp = 0
 	_images = None
 	def __init__(self, page, timestamp, images):
-		self.page = pageToDict(page)
-		self.timestamp = timestamp
-		#images: queryset
-		self.images = imgArrToDD(list(images))
+		self._page = pageToDict(page)
+		self._timestamp = timestamp
+		self._images = imgArrToDD(list(images))
 	def getJson(self):
+		from locale import str
 		progress = {
 			'result' : 'ok',
 			'page': self._page, 

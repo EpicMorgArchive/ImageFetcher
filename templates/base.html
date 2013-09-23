@@ -11,24 +11,24 @@
     <meta name="viewport" content="width=device-width">
     <!-- http://jqueryui.com/themeroller/ -->
     <!-- http://stackoverflow.com/questions/1348559/are-there-hosted-jquery-ui-themes-anywhere -->
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/jquery-ui/jquery-ui-base.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/font-awesome.min.css">
-    <!--[if lt IE 8]><link rel="stylesheet" href="{{ STATIC_URL }}css/font-awesome-ie7.min.css"><![endif]-->
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/css/base/jquery.ui.base.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0/css/bootstrap.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/cufon/1.09i/cufon-yui.js">
+    <!--[if lt IE 8]><link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.2.1/css/font-awesome-ie7.min.css"><![endif]-->
     <style>
         body {
             padding-top: 60px;
             padding-bottom: 40px;
         }
     </style>
-    <link rel="stylesheet" href="{{ STATIC_URL }}css/bootstrap-responsive.min.css">
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0/css/bootstrap-responsive.css">
     <link rel="stylesheet" href="{{ STATIC_URL }}css/main.css">
-    <script src="{{ STATIC_URL }}js/lib/modernizr-2.6.2-respond-1.1.0.min.js"></script>
-	<script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/es5-shim/2.1.0/es5-shim.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.9.1/jquery.js"></script>
 	<script>window.jQuery || document.write('<script src="{{ STATIC_URL }}js/lib/jquery-1.9.1.min.js"><\/script>')</script>
 
-	<script src="{{ STATIC_URL }}js/lib/jquery-ui-1.9.2.min.js"></script>
-	<script src="{{ STATIC_URL }}js/lib/bootstrap.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/jqueryui/1.10.3/jquery-ui.min.js"></script>
+	<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.0.0/js/bootstrap.min.js"></script>
 	<script src="{{ STATIC_URL }}js/plugins.js"></script>
 	<script src="{{ STATIC_URL }}js/main.js"></script>
 	{% block additional_imports %}{% endblock %} 
@@ -41,7 +41,7 @@
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="navbar-inner">
         <div class="container">
-            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".navbar-collapse">
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
@@ -51,7 +51,7 @@
                 <ul class="nav">
                     <li class="active"><a href="./">Home</a></li>
                 </ul>
-            </div><!--/.nav-collapse -->
+            </div><!--/.navbar-collapse -->
         </div>
     </div>
 </div>

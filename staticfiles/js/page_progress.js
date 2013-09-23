@@ -11,32 +11,34 @@ function fetchData(){
     });
 }
 function startProgress() {
-	setTimeout(progress, window.check_interval);
+	setTimeout(progress, 0);
 }
 function dbgOut(message) {
 	console.log(message);
 }
 //update loop
 function progress() {
-	dbgOut ('Progress started');
-	if (!fetch_running){
-		dbgOut ('Condition success');
-		fetch_running = true;
-		if(window.status < 2){
-			fetchData();
-			try
-			{
-				if (window.data["result"]==="ok")
-					dbgOut('Data ok');
-				else
-					dbgOut('Data error');
+	if (progress_enabled) {
+		dbgOut ('Progress started');
+		if (!fetch_running){
+			dbgOut ('Condition success');
+			fetch_running = true;
+			if(window.status < 2){
+				fetchData();
+				try
+				{
+					if (window.data["result"]==="ok")
+						dbgOut('Data ok');
+					else
+						dbgOut('Data error');
+				}
+				catch(e) {
+					dbgOut('JSON error');
+				}
 			}
-			catch(e) {
-				dbgOut('JSON error');
-			}
+			fetch_running = false;
+			dbgOut ('Progress exited');
+			setTimeout(progress, window.check_interval);
 		}
-		fetch_running = false;
-		dbgOut ('Progress exited');
-		setTimeout(progress, window.check_interval);
 	}
 }
