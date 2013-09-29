@@ -1,7 +1,7 @@
 #! /usr/bin/env python2.7
 import os
 import sys
-from ifwm.settings.mconf import *
+from mconf import *
 
 #media_root relative part
 IMAGE_SAVE_REAL_PATH = 'staticfiles/media/'
@@ -13,9 +13,9 @@ MAX_FETCH_PAGE_SIZE = 512*1024
 MAX_FETCH_IMAGE_SIZE = 4*1024*1024
 
 
-DEBUG = getDEBUG()
+DEBUG = get_debug()
 TEMPLATE_DEBUG = DEBUG
-DATABASES = getDATABASES()
+DATABASES = get_databases()
 ALLOWED_HOSTS = [
     '*'  # debug
 ]
@@ -114,55 +114,56 @@ LOCAL_APPS = (
 
 INSTALLED_APPS = ADMIN_TOOL_APPS + CORE_APPS + LOCAL_APPS + EXTERNAL_APPS
 
+
 def _require_debug_false(request):
     from django.conf import settings
     return not settings.DEBUG
 LOGGING = None
 if DEBUG:
-	LOGGING = {
-	    'version': 1,
-	    'disable_existing_loggers': False,
-	    'filters': {
-	        'require_debug_true': {
-	           '()': 'django.utils.log.RequireDebugTrue',
-	        },
-	    },
-	    'handlers': {
-	        'console': {
-	            'level': 'DEBUG',
-	            'class': 'logging.StreamHandler',
-	        },
-	    },
-	    'loggers': {
-	        'django.request': {
-	            'handlers': ['console'],
-	            'level': 'ERROR',
-	            'propagate': True,
-	        },
-	    }
-	}
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'filters': {
+            'require_debug_true': {
+               '()': 'django.utils.log.RequireDebugTrue',
+            },
+        },
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'django.request': {
+                'handlers': ['console'],
+                'level': 'ERROR',
+                'propagate': True,
+            },
+        }
+    }
 else:
-	LOGGING = {
-	    'version': 1,
-	    'disable_existing_loggers': False,
-	    'filters': {
-	        'require_debug_false': {
-	            '()': 'django.utils.log.CallbackFilter',
-	            'callback': _require_debug_false
-	        }
-	    },
-	    'handlers': {
-	        'console': {
-	            'level': 'DEBUG',
-	            'class': 'logging.StreamHandler',
-	        },
-	    },
-	    'loggers': {
-	        'django.request': {
-	            'handlers': ['console'],
-	            'level': 'ERROR',
-	            'propagate': True,
-	        },
-	    }
-	}
+    LOGGING = {
+        'version': 1,
+        'disable_existing_loggers': False,
+        'filters': {
+            'require_debug_false': {
+                '()': 'django.utils.log.CallbackFilter',
+                'callback': _require_debug_false
+            }
+        },
+        'handlers': {
+            'console': {
+                'level': 'DEBUG',
+                'class': 'logging.StreamHandler',
+            },
+        },
+        'loggers': {
+            'django.request': {
+                'handlers': ['console'],
+                'level': 'ERROR',
+                'propagate': True,
+            },
+        }
+    }
 

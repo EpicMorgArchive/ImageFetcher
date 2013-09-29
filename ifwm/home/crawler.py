@@ -98,6 +98,7 @@ def _filterDomainImages(imgurls, pageurl):
         del o
         if not curl:
             continue
+        curl = curl.replace('\\', '/') #urllib2 workaround
         imghash = getMD5Str(curl)
         #distinct
         if imghash in finurls:
@@ -134,7 +135,6 @@ def _fetchImg(img, save_dir):
         ):
             dbgOut('Banned image "%s"' % img.url.url)
             url.status = 4
-            url.save()
             return
             #extension
         if img.ext:
@@ -159,6 +159,7 @@ def _fetchImg(img, save_dir):
 
         url.status = 2
     except:
+        traceback.print_exc()
         dbgOut(
             'Error occurred while downloading %s' % img.url.url
         )
@@ -274,7 +275,7 @@ def _addImagesFromPage(page):
         page.url.save()
         page.save()
 
-
+#works
 def _MainLoop():
     dbgOut('Crawler works')
     while True:
