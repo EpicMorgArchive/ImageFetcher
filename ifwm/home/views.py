@@ -1,18 +1,12 @@
 #! /usr/bin/env python2.7
 # -*- coding: utf-8 -*-
-from django.conf import settings
-from django.conf.urls import url
-from django.core import serializers
 from django.core.validators import URLValidator
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django.utils import simplejson
 from django.views.generic import TemplateView, View
-from django.views.decorators.csrf import csrf_exempt
-from ifwm.home.crawler import StartCrawler
-from ifwm.home.helpClasses import *
-from ifwm.home.models import Pages, Images, Urls
-from django.core.context_processors import request
+from crawler import StartCrawler
+from helpClasses import *
+from models import Pages, Urls
 
 Validator = URLValidator()
 
@@ -92,7 +86,9 @@ class AddUrlView(TemplateView):
         if dburls:
             urlinfo = dburls[0]
             #link to image
-            if not Pages.objects.filter(url=urlinfo.id)[:1]:
+            if not Pages \
+                        .objects\
+                        .filter(url=urlinfo.id)[:1]:
                 return showErrorPage(
                     request,
                     'Bad url',
@@ -106,7 +102,7 @@ class AddUrlView(TemplateView):
                     'This url was banned',
                     403
                 )
-            elif urlinfo.status == 2 | urlinfo.status == 3:
+            elif urlinfo.status == 2 or urlinfo.status == 3:
                 urlinfo.status = 0
                 urlinfo.save()
         else:
@@ -126,8 +122,12 @@ class ImagesPageView(TemplateView):
     template_name = 'image_list.html'
 
     def _showPage(self, url, page, *args, **kwargs):
-        images = page.images_set.all().prefetch_related('url')
-        imglist = list(images)
+        imglist = list(
+            page
+            .images_set
+            .all()
+            .select_related('url')
+        )
         context = {
             'page': page,
             'images': imglist,
@@ -150,7 +150,9 @@ class ImagesPageView(TemplateView):
         sid = kwargs.get('id')
         try:
             pageid = int(sid)
-            page = Pages.objects.get(pk=pageid)
+            page = Pages \
+                .objects \
+                .get(pk=pageid)
         except Exception, e:
             return showErrorPage(
                 request,
@@ -181,19 +183,25 @@ class PageProgress(View):
             spageid = params.get('pageid')
             ctimestamp = int(sctimestamp)
             pageid = int(spageid)
-            sctimestamp = None
-            spageid = None
+            del sctimestamp
+            del spageid
             #date check
             timestamp = getTime()
             if ctimestamp > timestamp:
                 return self._badReq()
-            #db fetch
-            page = Pages.objects.get(pk=pageid)
-            images = page.images_set.exclude(
-                url__status__lt=2
-            ).filter(
-                url__date__gte=ctimestamp
-            ).prefetch_related('url')
+                #db fetch
+            page = Pages \
+                .objects \
+                .get(pk=pageid)
+            images = list(
+                page.images_set.exclude(
+                    url__status__lt=2
+                ).filter(
+                    url__date__gte=ctimestamp
+                ).select_related(
+                    'url'
+                )
+            )
             #jsonize
             pi = ProgressInfo(
                 page,

@@ -62,7 +62,7 @@ class ProgressInfo(object):
     def __init__(self, page, timestamp, images):
         self._page = pageToDict(page)
         self._timestamp = timestamp
-        self._images = imgArrToDD(list(images))
+        self._images = imgArrToDD(images)
 
     def getJson(self):
         progress = {
