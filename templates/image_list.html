@@ -46,10 +46,10 @@
         <br />
 		<div id="imglst">
         {% for image in images %}
-    		<a href="{{MEDIA_URL}}{{image.id}}.{{image.ext}}">
+    		<a href="{{MEDIA_URL}}{{image.}}{{image.ext}}">
 				<img
 					class="img_preview"
-					src="{%if image.url.status == 2%}{{MEDIA_URL}}{{image.id}}.{{ image.ext }}{% else %}{{ image.url }}{% endif %}"
+					src="{%if image.url.status == 2%}{{MEDIA_URL}}{{image.}}{{image.ext}}{% else %}{{ image.url.url }}{% endif %}"
 				/>
 			</a>
         {% endfor %}

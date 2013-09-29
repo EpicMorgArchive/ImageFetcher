@@ -1,7 +1,6 @@
 import json
 import time
 from hashlib import md5
-from locale import str
 
 
 def dbgOut(msg, lvl=0):

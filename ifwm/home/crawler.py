@@ -7,6 +7,7 @@ from ifwm.home.models import Pages, Urls, Images
 from time import sleep
 from ifwm import settings
 import os.path
+import random
 import re
 import traceback
 import urllib2
@@ -110,7 +111,7 @@ def _filterDomainImages(imgurls, pageurl):
 def _fetchImg(img, save_dir):
     try:
         dbgOut(
-            'Downloading image "%s"  to %d' % img.url.url, img.url.id
+            'Downloading image "%s"  to %d' % (img.url.url, img.url.id)
         )
         url = img.url
         url.status = 1
@@ -139,11 +140,11 @@ def _fetchImg(img, save_dir):
         if img.ext:
             ext = img.ext
         else:
-            ext = re.search(
+            ext = '.' + re.search(
                 'image/(\w+)',
                 content_type
             ).group(0)
-        save_filename = os.path.join(save_dir, str(url.id) + '.' + ext)
+        save_filename = os.path.join(save_dir, str(url.id) + ext)
         write_stream = open(save_filename, 'wb')
         if size == 0:
             max_dwnld = settings.MAX_FETCH_IMAGE_SIZE
@@ -211,35 +212,33 @@ def _addImagesFromPage(page):
         #remove existing urls those don't need to be fetched
         #update
         hashes = goodurls.keys()
-        images = Urls.objects.filter(
-            urlhash__in=hashes
+        images = Images.objects.filter(
+            url__urlhash__in=hashes
         )
+        images.prefetch_related('url')
         existing_urls_list = list(images)
         del images
         del hashes
         update_status = []
         for img in existing_urls_list:
-            if img.status == 3:
+            if img.url.status == 3 or img.url.status == 0:
                 dbgOut(
                     'Url with hash %s added to update list' % img.url.url
                 )
-                update_status.append(img.urlhash)
-                returls[img.urlhash] = img
-            del goodurls[img.urlhash]
+                update_status.append(img.url.urlhash)
+                returls[img.url.urlhash] = img
+            del goodurls[img.url.urlhash]
         del existing_urls_list
         if update_status:
             Urls.objects.filter(
                 urlhash__in=update_status
             ).update(
-                urlhash=0
+                status=0
             )
         del update_status
         #insert new items to db
         #TODO: move all to one transaction
         #rolled back
-
-        sql_urls = []
-        sql_images = []
         for imghash, img in goodurls.iteritems():
             if not imghash in returls:
                 dbgOut(
@@ -249,19 +248,15 @@ def _addImagesFromPage(page):
                 tmp_img_url.urlhash = imghash
                 tmp_img_url.url = img
                 tmp_img_url.status = 0
-                sql_urls.append(tmp_img_url)
-        saved_sql_urls = Urls.objects.bulk_create(sql_urls)
-        for imgurl in saved_sql_urls:
-            tmp_img = Images()
-            tmp_img.ext = os.path.splitext(imgurl.url)[1]
-            tmp_img.page = page
-            tmp_img.url = tmp_img_url
-            sql_images.append(tmp_img)
-            returls[imgurl.urlhash] = tmp_img
-            del goodurls[imgurl.urlhash]
-        Images.objects.bulk_create(sql_images)
-        del sql_urls
-        del sql_images
+                tmp_img_url.save()
+                tmp_img = Images()
+                tmp_img.ext = os.path.splitext(tmp_img_url.url)[1]
+                tmp_img.url = tmp_img_url
+                tmp_img.save() #many-to-many workaround
+                tmp_img.page.add(page)
+                tmp_img.save()
+                returls[imghash] = tmp_img
+        del goodurls
         dbgOut(
             'Parsing %s complete' % page.url.url
         )
@@ -284,6 +279,9 @@ def _MainLoop():
     dbgOut('Crawler works')
     while True:
         sleep(5)
+        Pages.objects.update()
+        Urls.objects.update()
+        Images.objects.update()
         try:
             #if True:
             #    dbgOut('ContinueWorks!')
@@ -305,21 +303,16 @@ def _MainLoop():
                 dbgOut('Got %d images' % len(images_hashes))
                 if not images_hashes:
                     continue
-                for imghash in sorted(
-                        images_hashes.keys(),
-                        key=lambda x: random.random()
-                ):
+                keys = images_hashes.keys()
+                random.shuffle(keys)
+                for imghash in keys:
                     img = images_hashes[imghash]
-                    _fetchImg(img, settings.MEDIA_ROOT, settings.MAX_FETCH_IMAGE_SIZE)
+                    _fetchImg(img, settings.MEDIA_ROOT)
                     del img
                     del images_hashes[imghash]
+                page.url.status = 2
+                page.url.save()
         except Exception, e:
-            trace = str(traceback.extract_stack()[-1][1])
-            dbgOut(
-                (
-                    'Exception occurred: %r %s' % (e, trace)
-                ),
-                3
-            )
+            traceback.print_exc()
             #return
             continue

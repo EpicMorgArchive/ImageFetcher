@@ -34,7 +34,7 @@ class ErrorPageView(TemplateView):
     template_name = 'error.html'
 
     def showError(self, error, status=200):
-    	StartCrawler()
+        StartCrawler()
         return render(
             self.request,
             self.template_name,
@@ -49,7 +49,7 @@ class HomeView(TemplateView):
     template_name = 'home.html'
 
     def get(self, request, *args, **kwargs):
-    	StartCrawler()
+        StartCrawler()
         return self.render_to_response({})
 
 
@@ -65,7 +65,7 @@ class AddUrlView(TemplateView):
         return urlinfo
 
     def post(self, request, *args, **kwargs):
-    	StartCrawler()
+        StartCrawler()
         url = request.POST.get('url', '')
         if not url:
             return showErrorPage(
@@ -126,15 +126,15 @@ class ImagesPageView(TemplateView):
     template_name = 'image_list.html'
 
     def _showPage(self, url, page, *args, **kwargs):
-        images = page.images_set.all()
-        images.prefetch_related('url')
+        images = page.images_set.all().prefetch_related('url')
+        imglist = list(images)
         context = {
             'page': page,
-            'images': images,
+            'images': imglist,
             'url': url,
             'timestamp': getTime(),
-            'args' : args,
-            'kwargs' : kwargs
+            'args': args,
+            'kwargs': kwargs
         }
         return self.render_to_response(context)
 
@@ -145,7 +145,7 @@ class ImagesPageView(TemplateView):
         return self._showPage(url, page, None, None)
 
     def get(self, request, *args, **kwargs):
-    	StartCrawler()
+        StartCrawler()
         pageid = 0
         sid = kwargs.get('id')
         try:
@@ -193,8 +193,7 @@ class PageProgress(View):
                 url__status__lt=2
             ).filter(
                 url__date__gte=ctimestamp
-            )
-            images.prefetch_related('url')
+            ).prefetch_related('url')
             #jsonize
             pi = ProgressInfo(
                 page,
@@ -209,9 +208,9 @@ class PageProgress(View):
             return self._badReq()
 
     def post(self, request, *args, **kwargs):
-    	StartCrawler()
-        return  self.resp(request.POST)
+        StartCrawler()
+        return self.resp(request.POST)
 
     def get(self, request, *args, **kwargs):
-    	StartCrawler()
-        return  self.resp(request.GET)
+        StartCrawler()
+        return self.resp(request.GET)
