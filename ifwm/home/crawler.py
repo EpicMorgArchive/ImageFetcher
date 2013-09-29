@@ -38,6 +38,7 @@ def _parseIntOrZero(string):
     except:
         return 0
 
+
 #works
 def _getPages():
     return list(
@@ -45,6 +46,7 @@ def _getPages():
             Q(url__status=0) | Q(url__status=3)
         )
     )
+
 
 #works
 def _copyStream(read_stream, write_stream, count):
@@ -60,6 +62,7 @@ def _copyStream(read_stream, write_stream, count):
     finally:
         read_stream.close()
         write_stream.close()
+
 
 #works
 def _findImageUrlsOnPage(page_str):
@@ -165,8 +168,11 @@ def _fetchImg(img, save_dir):
 #find queued images and add to DB
 #return their urls
 
+#works
 def _addImagesFromPage(page):
     try:
+        page.url.status = 1
+        page.url.save()
         pageurl = page.url.url
         dbgOut('Downloading page "%s"' % pageurl)
         result = urlopenUA(pageurl)
@@ -202,22 +208,21 @@ def _addImagesFromPage(page):
         #remove existing urls those don't need to be fetched
         #update
         hashes = goodurls.keys()
-        images = Images.objects.filter(
-            url__urlhash__in=hashes
+        images = Urls.objects.filter(
+            urlhash__in=hashes
         )
-        images.prefetch_related('url')
         existing_urls_list = list(images)
         del images
         del hashes
         update_status = []
         for img in existing_urls_list:
-            if img.url.status == 3:
+            if img.status == 3:
                 dbgOut(
                     'Url with hash %s added to update list' % img.url.url
                 )
-                update_status.append(img.url.urlhash)
-                returls[img.url.urlhash] = img
-            del goodurls[img.url.urlhash]
+                update_status.append(img.urlhash)
+                returls[img.urlhash] = img
+            del goodurls[img.urlhash]
         del existing_urls_list
         if update_status:
             Urls.objects.filter(
@@ -244,7 +249,7 @@ def _addImagesFromPage(page):
         saved_sql_urls = Urls.objects.bulk_create(sql_urls)
         for imgurl in saved_sql_urls:
             tmp_img = Images()
-            tmp_img.ext = os.splitext(imgurl.url)[1]
+            tmp_img.ext = os.path.splitext(imgurl.url)[1]
             tmp_img.page = page
             tmp_img.url = tmp_img_url
             sql_images.append(tmp_img)
@@ -257,7 +262,15 @@ def _addImagesFromPage(page):
             'Parsing %s complete' % page.url.url
         )
         return returls
-    except:
+    except urllib2.URLError, e:
+        if not hasattr(e, "code"):
+            raise
+        if e.code == 404:
+            page.url.status = 4
+            page.url.save()
+            page.save()
+    except Exception, e:
+        traceback.print_exc()
         page.url.status = 3
         page.url.save()
         page.save()
