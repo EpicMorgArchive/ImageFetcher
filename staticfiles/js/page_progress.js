@@ -1,16 +1,5 @@
-function fetchData(){
-	$.ajax ({
-        type: 'GET',
-        url: 'progress',
-        dataType: 'json',
-        async: false,
-        data: { 'timestamp': window.Timestamp, 'pageid' : window.PageID },
-        success: function (data) {
-         //process
-		 window.data = data;
-        }
-    });
-}
+//Helpers
+
 //removeClassIfExists
 function rCIF(element, classname) {
 	if (element.hasClass(classname))
@@ -21,6 +10,19 @@ function aCINF(element, classname) {
 	if (!element.hasClass(classname))
 		return element.addClass(classname)
 }
+//debug output
+function dbgOut(message) {
+	if (e_vb) {
+		console.log(message);
+	}
+}
+
+//wrapper
+function startProgress() {
+	setTimeout(updateProgressInfo, 0);
+}
+//Progress bar helpers
+
 //mpc - main progress container, mpb - main progress bar
 //progressBarShowZero
 function pBSZ(mpc, mpb){
@@ -48,20 +50,21 @@ function pBSE(mpc, mpb){
 	aCINF(mpb, s_pbds);
 	mpb.width(mpc.width());
 }
+
+
 function progressBarUpdate(){
 	if (window.e_pr) {
 		dbgOut('Progressbar update began');
 		if (window.data !== undefined){
 			var pageinfo = window.data["page"];
-			var ready = parseInt(pageinfo['ready']);
-			var total = parseInt(pageinfo['total']);
-			var status = parseInt(pageinfo['status']);
+			var ready = pageinfo['ready'];
+			var total = pageinfo['total'];
 			dbgOut('Progress render start');
 			
 			var mpc = $('#mpc');
 			var mpb = $('#mpb');
 			
-			switch(status) {
+			switch(window.Status) {
 				case 0:
 					pBSZ(mpc,mpb);
 					break;
@@ -100,16 +103,58 @@ function progressBarUpdate(){
 		}
 	}	
 }
-function startProgress() {
-	setTimeout(progress, 0);
+
+function addImage(image, imgc) {
+	
 }
-function dbgOut(message) {
-	if (e_vb) {
-		console.log(message);
+
+function addImages(images) {
+	var cnt = images.length;
+	var tmp = null;
+	var imgc = $('#imglist');
+	for (var i=0; i<cnt; i++) {
+		addImage(images[i], imgc);
 	}
 }
+
+//process progress data
+function processUpdateInfo(data){
+	try
+	{
+		if (data['result']!=='ok') {
+			dbgOut('Data error');
+			return;
+		}
+		dbgOut('Data ok');
+		window.Status = data['page']['status'];
+		window.Timestamp = data['timestamp'];
+		addImages(data['images'])
+	}
+	catch(e) {
+		dbgOut('JSON error');
+	}
+}
+
+//fetch progress data
+function fetchData(){
+	$.ajax ({
+        type: 'GET',
+        url: 'progress',
+        dataType: 'json',
+        async: false,
+        data: {
+			'timestamp': window.Timestamp,
+			'pageid' : window.PageID
+		},
+        success: function (data) {
+			window.data = data;
+			processUpdateInfo(data);
+        }
+    });
+}
+
 //update loop
-function progress() {
+function updateProgressInfo() {
 	if (window.e_pf) {
 		dbgOut ('Progress started');
 		if (!window.FetchRunning){
@@ -117,20 +162,11 @@ function progress() {
 			window.FetchRunning = true;
 			if(window.status < 2){
 				fetchData();
-				try
-				{
-					if (window.data['result']==='ok')
-						dbgOut('Data ok');
-					else
-						dbgOut('Data error');
-				}
-				catch(e) {
-					dbgOut('JSON error');
-				}
 			}
 			window.FetchRunning = false;
 			dbgOut ('Progress exited');
 		}
 	}
-	setTimeout(progress, window.CheckInterval);
+	setTimeout(updateProgressInfo, window.CheckInterval);
 }
+

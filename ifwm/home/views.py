@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect
 from django.utils import simplejson
 from django.views.generic import TemplateView, View
 from django.views.decorators.csrf import csrf_exempt
+from ifwm.home.crawler import StartCrawler
 from ifwm.home.helpClasses import *
 from ifwm.home.models import Pages, Images, Urls
 from django.core.context_processors import request
@@ -33,6 +34,7 @@ class ErrorPageView(TemplateView):
     template_name = 'error.html'
 
     def showError(self, error, status=200):
+    	StartCrawler()
         return render(
             self.request,
             self.template_name,
@@ -47,6 +49,7 @@ class HomeView(TemplateView):
     template_name = 'home.html'
 
     def get(self, request, *args, **kwargs):
+    	StartCrawler()
         return self.render_to_response({})
 
 
@@ -62,6 +65,7 @@ class AddUrlView(TemplateView):
         return urlinfo
 
     def post(self, request, *args, **kwargs):
+    	StartCrawler()
         url = request.POST.get('url', '')
         if not url:
             return showErrorPage(
@@ -141,14 +145,13 @@ class ImagesPageView(TemplateView):
         return self._showPage(url, page, None, None)
 
     def get(self, request, *args, **kwargs):
+    	StartCrawler()
         pageid = 0
         sid = kwargs.get('id')
         try:
             pageid = int(sid)
             page = Pages.objects.get(pk=pageid)
         except Exception, e:
-            raise e
-            pass
             return showErrorPage(
                 request,
                 '404',
@@ -206,7 +209,9 @@ class PageProgress(View):
             return self._badReq()
 
     def post(self, request, *args, **kwargs):
+    	StartCrawler()
         return  self.resp(request.POST)
 
     def get(self, request, *args, **kwargs):
+    	StartCrawler()
         return  self.resp(request.GET)

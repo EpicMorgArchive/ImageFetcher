@@ -2,10 +2,14 @@
 
 {% block additional_imports %}
 <script src="{{ STATIC_URL }}js/page_progress.js"></script>
+<!--[if lt IE 7]><link rel="stylesheet" href="css/bootstrap-ie6.css"><![endif]-->
+<link rel="stylesheet" href="css/bootstrap-image-gallery.css">
 <script>
+	//init pageinfo
 	var Status = {{ page.url.status }};
 	var Timestamp = {{ timestamp }};
 	var PageID = {{ page.url.id }};
+	//settings
 	var FetchRunning = false;	//lock
 	var CheckInterval = 5000; //data fetch interval
 	var e_pf = true;//data fetching
@@ -40,6 +44,7 @@
 			</div>
 		</div>
         <br />
+		<div id="imglst">
         {% for image in images %}
     		<a href="{{MEDIA_URL}}{{image.id}}.{{image.ext}}">
 				<img
@@ -48,6 +53,7 @@
 				/>
 			</a>
         {% endfor %}
+		</div>
     </div>
     <hr>
 {% endblock %}

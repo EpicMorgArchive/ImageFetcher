@@ -1,23 +1,23 @@
 #! /usr/bin/env python2.7
 import os
 import sys
-from settings.mconf import *
+from ifwm.settings.mconf import *
 
 #media_root relative part
-IMAGE_SAVE_REAL_PATH= 'staticfiles/media/'
+IMAGE_SAVE_REAL_PATH = 'staticfiles/media/'
 #media_url relative part to STATIC_URL
-IMAGE_SAVE_WEB_PATH= 'media'
+IMAGE_SAVE_WEB_PATH = 'media'
 #max page size to parse
-MAX_FETCH_PAGE_SIZE=512*1024
+MAX_FETCH_PAGE_SIZE = 512*1024
 #max image size to fetch
-MAX_FETCH_IMAGE_SIZE=4*1024*1024
+MAX_FETCH_IMAGE_SIZE = 4*1024*1024
 
 
-DEBUG=getDEBUG()
+DEBUG = getDEBUG()
 TEMPLATE_DEBUG = DEBUG
 DATABASES = getDATABASES()
 ALLOWED_HOSTS = [
-    '*' #debug
+    '*'  # debug
 ]
 ABSOLUTE_PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 ABSOLUTE_TEMPLATES_PATH = os.path.abspath(os.path.join(ABSOLUTE_PROJECT_ROOT, 'templates/'))
@@ -30,7 +30,7 @@ STATIC_ROOT = os.path.abspath(os.path.join(ABSOLUTE_PROJECT_ROOT, 'static/'))
 MEDIA_ROOT = os.path.abspath(os.path.join(ABSOLUTE_PROJECT_ROOT, IMAGE_SAVE_REAL_PATH))
 
 # URL that handles the media, static, etc.
-STATIC_URL = '/static/'
+STATIC_URL = 'static/'
 MEDIA_URL = STATIC_URL + IMAGE_SAVE_WEB_PATH
 
 STATICFILES_DIRS = (
