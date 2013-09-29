@@ -14,7 +14,6 @@ import urlparse
 
 #works
 def StartCrawler():
-    return
     dbgOut('CrawlerRequested')
     glb = globals()
     if not ('CrawlerStarted' in vars() or 'CrawlerStarted' in glb):
@@ -61,6 +60,48 @@ def _copyStream(read_stream, write_stream, count):
     finally:
         read_stream.close()
         write_stream.close()
+
+#works
+def _findImageUrlsOnPage(page_str):
+    parser = BeautifulSoup(page_str)
+    imgurls = []
+    for img in parser.find_all('img'):
+        imgurls.append(
+            img.get('src')
+        )
+    del parser
+    return imgurls
+
+
+#works
+def _filterDomainImages(imgurls, pageurl):
+    finurls = {}
+    pagehost = '.'.join(
+        urlparse.urlparse(pageurl).netloc.split('.')[-2:]
+    )
+    for img in imgurls:
+        try:
+            o = urlparse.urlparse(img)
+        except:
+            o = ''
+        nl = o.netloc
+        if nl == '':
+            curl = urlparse.urljoin(pageurl, o.path)
+        elif nl == pagehost or nl.endswith('.' + pagehost):
+            curl = img
+        else:
+            curl = None
+        del o
+        if not curl:
+            continue
+        imghash = getMD5Str(curl)
+        #distinct
+        if imghash in finurls:
+            continue
+        finurls[imghash] = curl
+        del curl
+    del imgurls
+    return finurls
 
 
 def _fetchImg(img, save_dir):
@@ -120,48 +161,6 @@ def _fetchImg(img, save_dir):
         url.status = 3
     finally:
         url.save()
-
-
-def _findImageUrlsOnPage(page_str):
-    parser = BeautifulSoup(page_str)
-    imgurls = []
-    for img in parser.find_all('img'):
-        imgurls.append(
-            img.get('src')
-        )
-    del parser
-    return imgurls
-
-
-def _filterDomainImages(imgurls, pageurl):
-    finurls = {}
-    pagehost = '.'.join(
-        urlparse.urlparse(pageurl).netloc.split('.')[-2:]
-    )
-    for img in imgurls:
-        try:
-            o = urlparse.urlparse(img)
-        except:
-            o = ''
-        nl = o.netloc
-        if nl == '':
-            curl = urlparse.urljoin(pageurl, o.path)
-        elif nl == pagehost or nl.endswith('.' + pagehost):
-            curl = img
-        else:
-            curl = None
-        del o
-        if not curl:
-            continue
-        imghash = getMD5Str(curl)
-        #distinct
-        if imghash in finurls:
-            continue
-        finurls[imghash] = curl
-        del curl
-    del imgurls
-    return finurls
-
 
 #find queued images and add to DB
 #return their urls
@@ -242,8 +241,8 @@ def _addImagesFromPage(page):
                 tmp_img_url.url = img
                 tmp_img_url.status = 0
                 sql_urls.append(tmp_img_url)
-        Urls.objects.bulk_create(sql_urls)
-        for imgurl in sql_urls:
+        saved_sql_urls = Urls.objects.bulk_create(sql_urls)
+        for imgurl in saved_sql_urls:
             tmp_img = Images()
             tmp_img.ext = os.splitext(imgurl.url)[1]
             tmp_img.page = page
