@@ -179,8 +179,11 @@ def _addImagesFromPage(page):
         returls = {}
         #check size
         #ban big pages and not web pages
-        str_size = result.headers['content-length']
-        size = _parseIntOrZero(str_size)
+        if 'content-length' in result.headers:
+            str_size = result.headers['content-length']
+            size = _parseIntOrZero(str_size)
+        else:
+            size = 0
         page.url.date = getTime()
         if size > settings.MAX_FETCH_PAGE_SIZE or (
             not result.headers['content-type'].startswith('text/')
@@ -233,6 +236,7 @@ def _addImagesFromPage(page):
         del update_status
         #insert new items to db
         #TODO: move all to one transaction
+        #rolled back
 
         sql_urls = []
         sql_images = []
