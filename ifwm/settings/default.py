@@ -11,7 +11,8 @@ IMAGE_SAVE_WEB_PATH = 'media'
 MAX_FETCH_PAGE_SIZE = 512*1024
 #max image size to fetch
 MAX_FETCH_IMAGE_SIZE = 4*1024*1024
-
+#log level
+DBG_OUT_LEVEL = 0
 
 DEBUG = get_debug()
 TEMPLATE_DEBUG = DEBUG

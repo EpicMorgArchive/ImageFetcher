@@ -1,6 +1,7 @@
 #! /usr/bin/env python2.7
 
 
+
 def get_debug():
     debug = True
     return debug

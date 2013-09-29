@@ -1,10 +1,11 @@
 import json
 import time
 from hashlib import md5
+from ifwm.settings import DBG_OUT_LEVEL
 
-
-def dbgOut(msg, lvl=0):
-    print msg
+def dbgOut(msg, lvl):
+    if lvl >= DBG_OUT_LEVEL:
+        print msg
 
 
 def getMD5Str(inputStr):

@@ -7,7 +7,6 @@ from ifwm.home.models import Pages, Urls, Images
 from time import sleep
 from ifwm import settings
 import os.path
-import random
 import re
 import traceback
 import urllib2
@@ -15,11 +14,11 @@ import urlparse
 
 #works
 def StartCrawler():
-    dbgOut('CrawlerRequested')
+    dbgOut('CrawlerRequested', 0)
     glb = globals()
     if not ('CrawlerStarted' in vars() or 'CrawlerStarted' in glb):
         glb['CrawlerStarted'] = True
-        dbgOut('Crawler started')
+        dbgOut('Crawler started', 3)
         from threading import Thread
 
         glb['thread'] = Thread(target=_MainLoop)
@@ -98,7 +97,7 @@ def _filterDomainImages(imgurls, pageurl):
         del o
         if not curl:
             continue
-        curl = curl.replace('\\', '/') #urllib2 workaround
+        curl = curl.replace('\\', '/') # urllib2 workaround
         imghash = getMD5Str(curl)
         #distinct
         if imghash in finurls:
@@ -112,7 +111,8 @@ def _filterDomainImages(imgurls, pageurl):
 def _fetchImg(img, save_dir):
     try:
         dbgOut(
-            'Downloading image "%s"  to %d' % (img.url.url, img.url.id)
+            'Downloading image "%s"  to %d' % (img.url.url, img.url.id),
+            0
         )
         url = img.url
         url.status = 1
@@ -133,7 +133,7 @@ def _fetchImg(img, save_dir):
                     not content_type.startswith('image/')
                 )
         ):
-            dbgOut('Banned image "%s"' % img.url.url)
+            dbgOut('Banned image "%s"' % img.url.url, 1)
             url.status = 4
             return
             #extension
@@ -152,16 +152,16 @@ def _fetchImg(img, save_dir):
             max_dwnld = size
         try:
             _copyStream(image_response, write_stream, max_dwnld)
-            dbgOut('Successfully downloaded image %s' % img.url.url)
+            dbgOut('Successfully downloaded image %s' % img.url.url, 0)
         except Exception, e:
             os.remove(save_filename)
             raise e
-
         url.status = 2
     except:
         traceback.print_exc()
         dbgOut(
-            'Error occurred while downloading %s' % img.url.url
+            'Error occurred while downloading %s' % img.url.url,
+            1
         )
         url.status = 3
     finally:
@@ -176,7 +176,7 @@ def _addImagesFromPage(page):
         page.url.status = 1
         page.url.save()
         pageurl = page.url.url
-        dbgOut('Downloading page "%s"' % pageurl)
+        dbgOut('Downloading page "%s"' % pageurl, 1)
         result = urlopenUA(pageurl)
         returls = {}
         #check size
@@ -190,7 +190,7 @@ def _addImagesFromPage(page):
         if size > settings.MAX_FETCH_PAGE_SIZE or (
             not result.headers['content-type'].startswith('text/')
         ):
-            dbgOut('Banned page "%s"' % page.url.url)
+            dbgOut('Banned page "%s"' % page.url.url, 2)
             page.url.status = 4
             page.url.save()
             return returls
@@ -208,7 +208,7 @@ def _addImagesFromPage(page):
         del imgurls
         if not goodurls:
             return returls
-        dbgOut('Got %d images from page "%s"' % (len(goodurls), page.url.url))
+        dbgOut('Got %d images from page "%s"' % (len(goodurls), page.url.url), 0)
             #remove all !error queued
         #remove existing urls those don't need to be fetched
         #update
@@ -224,7 +224,7 @@ def _addImagesFromPage(page):
         for img in existing_urls_list:
             if img.url.status == 3 or img.url.status == 0:
                 dbgOut(
-                    'Url with hash %s added to update list' % img.url.url
+                    'Url with hash %s added to update list' % img.url.url, 0
                 )
                 update_status.append(img.url.urlhash)
                 returls[img.url.urlhash] = img
@@ -243,7 +243,8 @@ def _addImagesFromPage(page):
         for imghash, img in goodurls.iteritems():
             if not imghash in returls:
                 dbgOut(
-                    'Url with hash %s added to download list' % imghash
+                    'Url with hash %s added to download list' % imghash,
+                    0
                 )
                 tmp_img_url = Urls()
                 tmp_img_url.urlhash = imghash
@@ -253,13 +254,14 @@ def _addImagesFromPage(page):
                 tmp_img = Images()
                 tmp_img.ext = os.path.splitext(tmp_img_url.url)[1]
                 tmp_img.url = tmp_img_url
-                tmp_img.save() #many-to-many workaround
+                tmp_img.save()  # many-to-many workaround
                 tmp_img.page.add(page)
                 tmp_img.save()
                 returls[imghash] = tmp_img
         del goodurls
         dbgOut(
-            'Parsing %s complete' % page.url.url
+            'Parsing %s complete' % page.url.url,
+            0
         )
         return returls
     except urllib2.URLError, e:
@@ -269,7 +271,7 @@ def _addImagesFromPage(page):
             page.url.status = 4
             page.url.save()
             page.save()
-    except Exception, e:
+    except:
         traceback.print_exc()
         page.url.status = 3
         page.url.save()
@@ -277,19 +279,16 @@ def _addImagesFromPage(page):
 
 #works
 def _MainLoop():
-    dbgOut('Crawler works')
+    dbgOut('Crawler works', 3)
     while True:
         sleep(5)
         Pages.objects.update()
         Urls.objects.update()
         Images.objects.update()
         try:
-            #if True:
-            #    dbgOut('ContinueWorks!')
-            #    continue
-            dbgOut('Connecting to DB')
+            dbgOut('Fetching pages from DB', 1)
             pages = _getPages()
-            dbgOut('Got %d pages from DB' % len(pages))
+            dbgOut('Got %d pages from DB' % len(pages), 0)
             if not pages:
                 continue
                 #images to download
@@ -301,7 +300,7 @@ def _MainLoop():
                 for imghash in tmp_img_hsh.keys():
                     images_hashes[imghash] = tmp_img_hsh[imghash]
                 del tmp_img_hsh
-                dbgOut('Got %d images' % len(images_hashes))
+                dbgOut('Got %d images' % len(images_hashes), 0)
                 if not images_hashes:
                     continue
                 keys = images_hashes.keys()
@@ -313,7 +312,6 @@ def _MainLoop():
                     del images_hashes[imghash]
                 page.url.status = 2
                 page.url.save()
-        except Exception, e:
+        except:
             traceback.print_exc()
-            #return
             continue

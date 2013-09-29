@@ -5,23 +5,23 @@
 <!--[if lt IE 7]><link rel="stylesheet" href="css/bootstrap-ie6.css"><![endif]-->
 <link rel="stylesheet" href="css/bootstrap-image-gallery.css">
 <script>
-	//init pageinfo
-	var Status = {{ page.url.status }};
-	var Timestamp = {{ timestamp }};
-	var PageID = {{ page.url.id }};
-	//settings
-	var FetchRunning = false;	//lock
-	var CheckInterval = 5000; //data fetch interval
-	var e_pf = true;//data fetching
-	var e_pr = true;//render progressbar
-	var e_vb = true;//debug output
-	
-	var s_pcss = 'progress-striped';
-	var s_pbis = 'progress-bar-info';
-	var s_pbss = 'progress-bar-success';
-	var s_pbds = 'progress-bar-danger';
-	$(window).load( startProgress );
-	window.setInterval(progressBarUpdate, CheckInterval);
+    //init pageinfo
+    var Status = {{ page.url.status }};
+    var Timestamp = {{ timestamp }};
+    var PageID = {{ page.url.id }};
+    //settings
+    var FetchRunning = false;    //lock
+    var CheckInterval = 5000; //data fetch interval
+    var e_pf = true;//data fetching
+    var e_pr = true;//render progressbar
+    var e_vb = true;//debug output
+    
+    var s_pcss = 'progress-striped';
+    var s_pbis = 'progress-bar-info';
+    var s_pbss = 'progress-bar-success';
+    var s_pbds = 'progress-bar-danger';
+    $(window).load( startProgress );
+    window.setInterval(progressBarUpdate, CheckInterval);
 </script>
 {% endblock %}
 
@@ -34,26 +34,28 @@
         <h1 style="text-align: center;">Saved images from  {{ page.url.url }}</h1>
         <br/>
         Images:
-		<div>
-			<div id="mpc" class="progress active">
-			  <div id="mpb" class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-				<span class="sr-only">
-					<span id="mpll" class="prgspan">0</span> of <span id="mplt" class="prgspan">0</span>
-				</span>
-			  </div>
-			</div>
-		</div>
+        <div>
+            <div id="mpc" class="progress active">
+              <div id="mpb" class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+                <span class="sr-only">
+                    <span id="mpll" class="prgspan">0</span> of <span id="mplt" class="prgspan">0</span>
+                </span>
+              </div>
+            </div>
+        </div>
         <br />
-		<div id="imglst">
+        <div id="imglst">
         {% for image in images %}
-    		<a href="{{MEDIA_URL}}{{image.pk}}{{image.ext}}">
-				<img
-					class="img_preview"
-					src="{%if image.url.status == 2%}{{MEDIA_URL}}{{image.pk}}{{image.ext}}{% else %}{{ image.url.url }}{% endif %}"
-				/>
-			</a>
+            <div class="imgdiv">
+                <a href="{{MEDIA_URL}}{{image.pk}}{{image.ext}}">
+                    <img
+                        class="img_preview"
+                        src="{%if image.url.status == 2%}{{MEDIA_URL}}{{image.pk}}{{image.ext}}{% else %}{{ image.url.url }}{% endif %}"
+                    />
+                </a>
+            </div>
         {% endfor %}
-		</div>
+        </div>
     </div>
     <hr>
 {% endblock %}
