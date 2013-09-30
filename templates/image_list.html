@@ -2,8 +2,8 @@
 
 {% block additional_imports %}
 <script src="{{ STATIC_URL }}js/page_progress.js"></script>
-<!--[if lt IE 7]><link rel="stylesheet" href="css/bootstrap-ie6.css"><![endif]-->
-<link rel="stylesheet" href="css/bootstrap-image-gallery.css">
+<link rel="stylesheet" href="{{ STATIC_URL }}css/blueimp-gallery.min.css">
+<script src="{{ STATIC_URL }}js/blueimp-gallery.min.js"></script>
 <script>
     //init pageinfo
     var Status = {{ page.url.status }};
@@ -22,18 +22,38 @@
     var s_pbds = 'progress-bar-danger';
     $(window).load( startProgress );
     window.setInterval(progressBarUpdate, CheckInterval);
+    $(window).load((function(){document.getElementById('imglst').onclick = function (event) {
+        event = event || window.event;
+        var target = event.target || event.srcElement,
+            link = target.src ? target.parentNode : target,
+            options = {index: link, event: event},
+            links = this.getElementsByTagName('a');
+        blueimp.Gallery(links, options);
+    };
+    }));
 </script>
 {% endblock %}
 
 {% autoescape on %}
 {% block title %} Image fetcher | {{ page.url.url }} {% endblock %}
 {% endautoescape %}
-
+{% block bodyimports %}
+   <!-- The Gallery as lightbox dialog, should be a child element of the document body -->
+    <div id="blueimp-gallery" class="blueimp-gallery">
+        <div class="slides"></div>
+        <h3 class="title"></h3>
+        <a class="prev">‹</a>
+        <a class="next">›</a>
+        <a class="close">×</a>
+        <a class="play-pause"></a>
+        <ol class="indicator"></ol>
+    </div>
+{% endblock %}
 {% block container %}
     <div class="container">
         <h1 style="text-align: center;">Saved images from  {{ page.url.url }}</h1>
         <br/>
-        Images:
+        <!--progressbar-->
         <div>
             <div id="mpc" class="progress active">
               <div id="mpb" class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
@@ -44,16 +64,12 @@
             </div>
         </div>
         <br />
-        <div id="imglst">
+        <!--images-->
+        <div id='imglst'>
         {% for image in images %}
-            <div class="imgdiv">
-                <a href="{{MEDIA_URL}}{{image.pk}}{{image.ext}}">
-                    <img
-                        class="img_preview"
-                        src="{%if image.url.status == 2%}{{MEDIA_URL}}{{image.pk}}{{image.ext}}{% else %}{{ image.url.url }}{% endif %}"
-                    />
-                </a>
-            </div>
+            <a href="{{MEDIA_URL}}{{image.pk}}{{image.ext}}">
+                <img src="{%if image.url.status == 2%}{{MEDIA_URL}}{{image.pk}}{{image.ext}}{% else %}{{ image.url.url }}{% endif %}"/>
+            </a>
         {% endfor %}
         </div>
     </div>
