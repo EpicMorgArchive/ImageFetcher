@@ -23,7 +23,7 @@ def imgArrToDD(images):
     cnt = len(images)
     retval = [None] * cnt
     for i in xrange(0, cnt):
-        retval[i] = imgToDict(images(i))
+        retval[i] = imgToDict(images[i])
     return retval
 
 

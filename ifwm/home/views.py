@@ -178,7 +178,7 @@ class PageProgress(View):
 
     def resp(self, params):
         try:
-            #parse
+        #parse
             sctimestamp = params.get('timestamp')
             spageid = params.get('pageid')
             ctimestamp = int(sctimestamp)
