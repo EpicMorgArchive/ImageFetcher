@@ -33,6 +33,7 @@ def imgToDict(image):
         'status': image.url.status,
         'imageid': image.pk,
         'preview': image.has_s,
+        'ext':  image.ext
     }
 
 

@@ -105,13 +105,19 @@ function progressBarUpdate(){
 }
 
 function addImage(image, imgc) {
-    
+    //imgc.append(
+	dbgOut('Appending image');
+	var tmp_imgurl = image['status']==2?window.images_url+image['imageid'].toString()+image['ext']:image['url'];
+	dbgOut(tmp_imgurl);
+	var str = '<a href="'+tmp_imgurl+'">'+'<img src="'+tmp_imgurl+'"></img>'+'</a>';
+	dbgOut(str);
+	imgc.append(str);
 }
 
 function addImages(images) {
     var cnt = images.length;
     var tmp = null;
-    var imgc = $('#imglist');
+    var imgc = $('#imglst');
     for (var i=0; i<cnt; i++) {
         addImage(images[i], imgc);
     }

@@ -20,6 +20,7 @@
     var s_pbis = 'progress-bar-info';
     var s_pbss = 'progress-bar-success';
     var s_pbds = 'progress-bar-danger';
+    var images_url = '{{MEDIA_URL}}';
     $(window).load( startProgress );
     window.setInterval(progressBarUpdate, CheckInterval);
     $(window).load((function(){document.getElementById('imglst').onclick = function (event) {
