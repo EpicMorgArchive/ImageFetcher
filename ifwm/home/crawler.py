@@ -1,5 +1,5 @@
 # coding=utf-8
-from random import random
+from random import random, shuffle
 from bs4 import BeautifulSoup
 from django.db.models import Q
 from ifwm.home.helpClasses import getTime, getMD5Str, dbgOut
@@ -304,7 +304,7 @@ def _MainLoop():
                 if not images_hashes:
                     continue
                 keys = images_hashes.keys()
-                random.shuffle(keys)
+                shuffle(keys)
                 for imghash in keys:
                     img = images_hashes[imghash]
                     _fetchImg(img, settings.MEDIA_ROOT)
